@@ -33,7 +33,7 @@ export function SummaryCard({
         </div>
 
         {(revenue !== "—" || grossProfit !== "—") && (
-          <div className="grid grid-cols-2 gap-4 py-4 border-y border-border">
+          <div className="grid grid-cols-2 gap-4 py-4 border-t border-border">
             <div>
               <div className="text-2xl font-semibold mb-1">{revenue}</div>
               <div className="text-sm text-muted-foreground">Revenue</div>
@@ -46,7 +46,7 @@ export function SummaryCard({
         )}
 
         {products.length > 0 && (
-          <div>
+          <div className="pt-4 border-t border-border">
             <div className="text-sm font-medium mb-3">Products & Services</div>
             <div className="flex flex-wrap gap-2">
               {products.map((product) => (
@@ -59,8 +59,8 @@ export function SummaryCard({
         )}
 
         {markets.length > 0 && (
-          <div>
-            <div className="text-sm font-medium mb-3">End Markets</div>
+          <div className="pt-4">
+            <div className="text-sm font-medium mb-3">Customer Segments</div>
             <div className="flex flex-wrap gap-2">
               {markets.map((market) => (
                 <Badge key={market} variant="secondary" className="bg-tag text-tag-foreground">

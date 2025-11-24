@@ -14,6 +14,9 @@ export interface AnalysisResult {
   grossProfit: string;
   products: string[];
   markets: string[];
+  industry: string;
+  businessModel: string;
+  locationType: string;
   growth: string;
   profitability: string;
   marketTiming: string;

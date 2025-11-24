@@ -2,8 +2,11 @@ import { AnalysisResult } from "@/services/analysis";
 import { SummaryCard } from "./SummaryCard";
 import { Slider } from "@/components/ui/slider";
 import { useState } from "react";
-import { TrendingUp, CheckCircle2, FileText } from "lucide-react";
+import { TrendingUp, CheckCircle2, FileText, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { HowItWorksFooter } from "./HowItWorksFooter";
+import { CTAFooter } from "./CTAFooter";
 
 interface Step3AnalysisProps {
   analysis: AnalysisResult;
@@ -30,19 +33,66 @@ export function Step3Analysis({ analysis }: Step3AnalysisProps) {
 
             {/* Score Card */}
             <div className="bg-card border border-border rounded-lg p-8">
-              <div className="flex items-center gap-6 mb-6">
-                <div className="flex-shrink-0">
-                  <div className="w-24 h-24 rounded-full border-4 border-primary flex items-center justify-center">
-                    <span className="text-3xl font-bold">{analysis.score}</span>
+              <h2 className="text-2xl font-serif font-semibold mb-6">
+                Sell Readiness Score
+              </h2>
+              <div className="flex items-center gap-4 mb-4">
+                <div className="text-6xl font-bold">
+                  {analysis.score}
+                </div>
+                <div className="text-4xl text-muted-foreground font-light">
+                  / 100
+                </div>
+              </div>
+              <p className="text-muted-foreground text-lg">
+                Your business shows {analysis.score >= 70 ? "strong" : "moderate"} readiness for a sale
+              </p>
+            </div>
+
+            {/* Business Snapshot */}
+            <div className="space-y-6">
+              <h2 className="text-3xl font-serif font-semibold flex items-center gap-2">
+                <Building2 className="w-6 h-6" />
+                Business Snapshot
+              </h2>
+              
+              <div className="bg-card border border-border rounded-lg p-6 space-y-4">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-1">Industry</div>
+                    <div className="font-medium">{analysis.industry}</div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-1">Business Model</div>
+                    <div className="font-medium">{analysis.businessModel}</div>
                   </div>
                 </div>
+
                 <div>
-                  <h2 className="text-2xl font-serif font-semibold mb-2">
-                    Sell Readiness Score
-                  </h2>
-                  <p className="text-muted-foreground">
-                    Out of 100 — Your business shows {analysis.score >= 70 ? "strong" : "moderate"} readiness for a sale
-                  </p>
+                  <div className="text-sm text-muted-foreground mb-2">Products & Services</div>
+                  <div className="flex flex-wrap gap-2">
+                    {analysis.products.map((product) => (
+                      <Badge key={product} variant="secondary" className="bg-tag text-tag-foreground">
+                        {product}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <div className="text-sm text-muted-foreground mb-2">Customer Segments</div>
+                  <div className="flex flex-wrap gap-2">
+                    {analysis.markets.map((market) => (
+                      <Badge key={market} variant="secondary" className="bg-tag text-tag-foreground">
+                        {market}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <div className="text-sm text-muted-foreground mb-1">Location Type</div>
+                  <div className="font-medium">{analysis.locationType}</div>
                 </div>
               </div>
             </div>
@@ -87,13 +137,20 @@ export function Step3Analysis({ analysis }: Step3AnalysisProps) {
                   step={0.5}
                   className="w-full"
                 />
-                <div className="text-center pt-4">
-                  <div className="text-3xl font-bold text-primary mb-1">
-                    {sliderValue[0]}x Multiple
+                <div className="text-center pt-4 space-y-3">
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-1">Estimated Multiple</div>
+                    <div className="text-3xl font-bold text-primary">
+                      {sliderValue[0]}x
+                    </div>
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    Estimated business value based on revenue multiple
-                  </p>
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-1">Estimated Valuation</div>
+                    <div className="text-2xl font-semibold">
+                      $600,000–$720,000
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">(placeholder)</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -119,20 +176,8 @@ export function Step3Analysis({ analysis }: Step3AnalysisProps) {
               </div>
             </div>
 
-            {/* CTA Section */}
-            <div className="border-t border-border pt-12 mt-12">
-              <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-                <div>
-                  <h2 className="text-3xl font-serif font-semibold mb-3">
-                    Interested in selling your business?
-                  </h2>
-                  <p className="text-muted-foreground">Learn more about OffDeal</p>
-                </div>
-                <Button size="lg" className="px-8 h-12 bg-primary hover:bg-primary/90">
-                  Get in touch
-                </Button>
-              </div>
-            </div>
+            <HowItWorksFooter />
+            <CTAFooter />
           </div>
 
           {/* Sticky Summary Card */}
