@@ -57,6 +57,16 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        "summary-card": "hsl(var(--summary-card-bg))",
+        "tag": {
+          DEFAULT: "hsl(var(--tag-bg))",
+          foreground: "hsl(var(--tag-text))",
+        },
+        "step-inactive": "hsl(var(--step-inactive))",
+      },
+      fontFamily: {
+        serif: ['Playfair Display', 'Georgia', 'serif'],
+        sans: ['system-ui', '-apple-system', 'sans-serif'],
       },
       borderRadius: {
         lg: "var(--radius)",
