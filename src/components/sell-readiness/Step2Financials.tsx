@@ -3,6 +3,9 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { StepIndicator } from "./StepIndicator";
 import { SummaryCard } from "./SummaryCard";
+import { HowItWorksFooter } from "./HowItWorksFooter";
+import { CTAFooter } from "./CTAFooter";
+import { formatNumberWithCommas, parseFormattedNumber } from "@/lib/formatters";
 
 interface Step2FinancialsProps {
   website: string;
@@ -12,12 +15,36 @@ interface Step2FinancialsProps {
 export function Step2Financials({ website, onNext }: Step2FinancialsProps) {
   const [revenue, setRevenue] = useState("");
   const [grossProfit, setGrossProfit] = useState("");
+  const [error, setError] = useState("");
+
+  const handleRevenueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatNumberWithCommas(e.target.value);
+    setRevenue(formatted);
+    setError("");
+  };
+
+  const handleGrossProfitChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatNumberWithCommas(e.target.value);
+    setGrossProfit(formatted);
+    setError("");
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (revenue.trim() && grossProfit.trim()) {
-      onNext(revenue, grossProfit);
+    
+    if (!revenue.trim() || !grossProfit.trim()) {
+      return;
     }
+
+    const revenueNum = parseFormattedNumber(revenue);
+    const grossProfitNum = parseFormattedNumber(grossProfit);
+
+    if (grossProfitNum > revenueNum) {
+      setError("Gross profit cannot exceed revenue");
+      return;
+    }
+
+    onNext(revenue, grossProfit);
   };
 
   return (
@@ -41,7 +68,7 @@ export function Step2Financials({ website, onNext }: Step2FinancialsProps) {
                   type="text"
                   placeholder="Enter your revenue"
                   value={revenue}
-                  onChange={(e) => setRevenue(e.target.value)}
+                  onChange={handleRevenueChange}
                   className="h-12"
                   required
                 />
@@ -53,10 +80,13 @@ export function Step2Financials({ website, onNext }: Step2FinancialsProps) {
                   type="text"
                   placeholder="Enter your gross profit"
                   value={grossProfit}
-                  onChange={(e) => setGrossProfit(e.target.value)}
+                  onChange={handleGrossProfitChange}
                   className="h-12"
                   required
                 />
+                {error && (
+                  <p className="text-sm text-destructive mt-2">{error}</p>
+                )}
               </div>
 
               <Button
@@ -82,6 +112,9 @@ export function Step2Financials({ website, onNext }: Step2FinancialsProps) {
         </div>
 
         <StepIndicator currentStep={2} />
+        
+        <HowItWorksFooter />
+        <CTAFooter />
       </div>
     </div>
   );

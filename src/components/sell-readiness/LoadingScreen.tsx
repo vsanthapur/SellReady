@@ -15,7 +15,10 @@ export function LoadingScreen({ website, revenue, grossProfit }: LoadingScreenPr
             <div className="text-center space-y-4">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
               <p className="text-lg text-muted-foreground">
-                Analyzing your business products and services...
+                Analyzing your business…
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Reviewing your products, services, and financials…
               </p>
             </div>
           </div>

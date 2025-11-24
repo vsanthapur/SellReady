@@ -14,8 +14,13 @@ const Index = () => {
   const [grossProfit, setGrossProfit] = useState("");
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
 
-  const handleWebsiteSubmit = (url: string) => {
+  const handleWebsiteSubmit = async (url: string) => {
     setWebsite(url);
+    setCurrentStep("loading");
+    
+    // Simulate analysis delay
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    
     setCurrentStep("financials");
   };
 
