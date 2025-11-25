@@ -114,17 +114,3 @@ For deployment:
 - `src/components/sell-readiness/Step3Analysis.tsx` is the main report page, while `src/components/sell-readiness/report/*` holds the report sections.
 
 ---
-
-## PDF Export
-
-Clicking “Download Report” in Step 3 captures the entire report container via `html2canvas`, stitches it into a multi-page PDF with `jspdf`, and saves it locally. This works client-side; no backend required.
-
----
-
-## Questions / Next Steps
-
-- Configure rate limits or caching if you expect heavy LLM usage.  
-- Swap in your preferred LLM provider by replacing the OpenAI client in `src/server/lib/openaiClient.ts`.  
-- For production, consider running the API as serverless functions to take advantage of automatic scaling.
-
-Happy shipping!
