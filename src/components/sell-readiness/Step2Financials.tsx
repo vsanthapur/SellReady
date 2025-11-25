@@ -48,15 +48,15 @@ export function Step2Financials({ website, onNext }: Step2FinancialsProps) {
   };
 
   return (
-    <div className="min-h-screen bg-background py-16 px-4">
-      <div className="container mx-auto max-w-6xl">
-        <div className="grid lg:grid-cols-2 gap-12 items-start mb-16">
+    <div className="min-h-screen bg-background py-12 px-4">
+      <div className="container mx-auto max-w-7xl">
+        <div className="grid lg:grid-cols-[1fr,500px] gap-8 items-start mb-12">
           <div>
-            <div className="text-sm text-muted-foreground mb-4">Step 2 of 3</div>
-            <h1 className="text-5xl font-serif font-semibold mb-6 tracking-tight">
+            <div className="text-sm text-muted-foreground mb-3">Step 2 of 3</div>
+            <h1 className="text-4xl font-serif font-semibold mb-4 tracking-tight">
               About your business
             </h1>
-            <p className="text-lg text-muted-foreground mb-12 leading-relaxed">
+            <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
               Now, let's get some financial data. This will help us calculate your margins
               and assess how ready your business is for a sale.
             </p>
@@ -99,14 +99,14 @@ export function Step2Financials({ website, onNext }: Step2FinancialsProps) {
             </form>
           </div>
 
-          <div className="lg:sticky lg:top-8">
+          <div className="lg:sticky lg:top-8 h-fit">
             <SummaryCard
               businessName="Your Business"
               website={website}
               revenue={revenue || "—"}
               grossProfit={grossProfit || "—"}
-              products={[]}
-              markets={[]}
+              products={["Service A", "Service B", "Product C"]}
+              markets={["SMB", "Enterprise", "Consumer"]}
             />
           </div>
         </div>

@@ -1,4 +1,4 @@
-import { SAMPLE_ANALYSIS_DATA } from "@/lib/constants";
+import type { AnalysisResult, BackendResponse } from "@/types/analysis";
 
 export interface BusinessData {
   website: string;
@@ -6,52 +6,74 @@ export interface BusinessData {
   grossProfit: string;
 }
 
-export interface AnalysisResult {
-  score: number;
-  businessName: string;
-  website: string;
-  revenue: string;
-  grossProfit: string;
-  products: string[];
-  markets: string[];
-  industry: string;
-  businessModel: string;
-  locationType: string;
-  growth: string;
-  profitability: string;
-  marketTiming: string;
-  buyerAppetite: string;
-  ownerDependence: string;
-  recommendedActions: string[];
-}
+// Re-export types from centralized location
+export type { AnalysisResult };
+
+import { parseFormattedNumber } from "@/lib/formatters";
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
 
 /**
- * Placeholder function to fetch sell readiness analysis
- * Currently returns hardcoded data
- * TODO: Replace with actual API call to backend LLM service
+ * Fetches sell readiness analysis from backend API
  */
 export async function fetchSellReadiness(
   businessData: BusinessData
 ): Promise<AnalysisResult> {
-  // Simulate API delay
-  await new Promise((resolve) => setTimeout(resolve, 2000));
-
-  // Return hardcoded data for now
-  return {
-    ...SAMPLE_ANALYSIS_DATA,
-    website: businessData.website,
-    revenue: businessData.revenue,
-    grossProfit: businessData.grossProfit,
-    businessName: extractBusinessName(businessData.website)
-  };
-}
-
-function extractBusinessName(url: string): string {
   try {
-    const domain = new URL(url).hostname.replace("www.", "");
-    const name = domain.split(".")[0];
-    return name.charAt(0).toUpperCase() + name.slice(1) + " Inc.";
-  } catch {
-    return "Your Business";
+    // Parse revenue and grossProfit from formatted strings (handles $ and commas)
+    const revenueNum = parseFormattedNumber(businessData.revenue);
+    const grossProfitNum = parseFormattedNumber(businessData.grossProfit);
+
+    // Validate parsed numbers
+    if (isNaN(revenueNum) || isNaN(grossProfitNum) || revenueNum < 0 || grossProfitNum < 0) {
+      throw new Error("Invalid revenue or gross profit values");
+    }
+
+    const response = await fetch(`${API_BASE_URL}/api/analyze`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        website: businessData.website,
+        revenue: revenueNum,
+        grossProfit: grossProfitNum,
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: "Unknown error" }));
+      throw new Error(error.error || `HTTP error! status: ${response.status}`);
+    }
+
+    const data: BackendResponse = await response.json();
+
+    // Transform backend response to match frontend interface
+    return {
+      score: data.score,
+      readinessLabel: data.readinessLabel,
+      scoreColor: data.scoreColor,
+      subScores: data.subScores,
+      summaryNote: data.summaryNote,
+      businessName: data.business.name,
+      website: data.business.website,
+      revenue: data.business.revenue,
+      grossProfit: data.business.grossProfit,
+      products: data.business.products,
+      markets: data.business.segments,
+      executiveSummary: data.executiveSummary,
+      strengths: data.strengths,
+      risks: data.risks,
+      growth: data.factors.growth,
+      profitability: data.factors.profitability,
+      marketTiming: data.factors.marketTiming,
+      buyerAppetite: data.factors.buyerAppetite,
+      ownerDependence: data.factors.ownerDependence,
+      valuation: data.valuation,
+      recommendedActions: data.recommendedActions,
+    };
+  } catch (error) {
+    console.error("Error fetching sell readiness analysis:", error);
+    throw error;
   }
 }

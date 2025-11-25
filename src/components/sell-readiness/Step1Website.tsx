@@ -36,7 +36,7 @@ export function Step1Website({ onNext }: Step1WebsiteProps) {
         <div className="max-w-2xl mx-auto mb-16">
           <form onSubmit={handleSubmit} className="flex gap-3 mb-8">
             <Input
-              type="url"
+              type="text"
               placeholder="Enter your business website"
               value={website}
               onChange={(e) => setWebsite(e.target.value)}

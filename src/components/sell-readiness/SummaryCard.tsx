@@ -17,6 +17,14 @@ export function SummaryCard({
   products,
   markets
 }: SummaryCardProps) {
+  const formatCurrency = (value: string) => {
+    if (value === "—") return value;
+    // If it already starts with $, return as is
+    if (value.startsWith("$")) return value;
+    // Otherwise add $ prefix (for API responses that don't have $)
+    return `$${value}`;
+  };
+
   return (
     <div className="bg-summary-card rounded-lg p-8 shadow-sm">
       <div className="bg-card rounded-lg p-6 space-y-6">
@@ -32,18 +40,20 @@ export function SummaryCard({
           </a>
         </div>
 
-        {(revenue !== "—" || grossProfit !== "—") && (
-          <div className="grid grid-cols-2 gap-4 py-4 border-t border-border">
-            <div>
-              <div className="text-2xl font-semibold mb-1">{revenue}</div>
-              <div className="text-sm text-muted-foreground">Revenue</div>
+        <div className="grid grid-cols-2 gap-4 py-4 border-t border-border">
+          <div>
+            <div className={`text-2xl font-semibold mb-1 ${revenue === "—" ? "line-through text-muted-foreground" : ""}`}>
+              {formatCurrency(revenue)}
             </div>
-            <div>
-              <div className="text-2xl font-semibold mb-1">{grossProfit}</div>
-              <div className="text-sm text-muted-foreground">Gross Profit</div>
-            </div>
+            <div className="text-sm text-muted-foreground">Revenue</div>
           </div>
-        )}
+          <div>
+            <div className={`text-2xl font-semibold mb-1 ${grossProfit === "—" ? "line-through text-muted-foreground" : ""}`}>
+              {formatCurrency(grossProfit)}
+            </div>
+            <div className="text-sm text-muted-foreground">Gross Profit</div>
+          </div>
+        </div>
 
         {products.length > 0 && (
           <div className="pt-4 border-t border-border">

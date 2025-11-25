@@ -38,7 +38,7 @@ export const HOW_IT_WORKS_STEPS = [
   },
   {
     number: "02",
-    title: "ANALYZE FINANCIALS",
+    title: "ANALYZE YOUR FINANCIALS",
     description: "We'll analyze your revenue and profitability to assess business health."
   },
   {
