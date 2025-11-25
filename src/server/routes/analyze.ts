@@ -1,9 +1,15 @@
 import { Request, Response } from "express";
 import { extractWebsiteIntelligence } from "../logic/websiteExtraction";
-import { calculateScoring } from "../logic/scoring";
+import { runScoringResearch } from "../logic/scoring";
+import { computeProfitabilityScore } from "../logic/profitabilityEngine";
+import { buildFinalScores } from "../logic/scoringEngine";
 import { calculateValuation } from "../logic/valuation";
 import { generateReportNarrative } from "../logic/reportNarrative";
-import type { StructuredBackendResponse, WebsiteExtraction } from "../../types/analysis";
+import type {
+  StructuredBackendResponse,
+  WebsiteExtraction,
+  ScoringResearchOutput,
+} from "../../types/analysis";
 
 interface AnalyzeRequest {
   website: string;
@@ -51,28 +57,55 @@ export async function analyzeHandler(req: Request, res: Response) {
       websiteExtraction = extractWebsiteIntelligence(website);
     }
 
-    // Step 2: Factor Scoring Engine (LLM Call 2)
-    const scoring = calculateScoring(revenue, grossProfit, websiteExtraction);
+    // Step 2: LLM research (Call 2)
+    const research: ScoringResearchOutput = runScoringResearch(revenue, grossProfit, websiteExtraction);
 
-    // Step 3: Deterministic Valuation (no LLM)
+    // Backend profitability math
+    const profitability = computeProfitabilityScore(revenue, grossProfit, research.sgnaBand.mid);
+    console.log(
+      `[${timestamp}] [PROFITABILITY] Metrics:`,
+      JSON.stringify(profitability, null, 2)
+    );
+
+    const profitabilityJustification = `${research.profitabilityInsights.industryProfitabilityNotes} (${research.profitabilityInsights.descriptors.join(
+      ", "
+    )})`;
+
+    // Final scoring engine
+    const scores = buildFinalScores(research, profitability, profitabilityJustification);
+    console.log(`[${timestamp}] [SCORING_ENGINE] Scores:`, JSON.stringify(scores, null, 2));
+
+    // Deterministic valuation
     const valuation = calculateValuation(revenue, grossProfit);
 
-    // Step 4: Report Narrative Generator (LLM Call 3)
-    const report = generateReportNarrative(websiteExtraction, scoring, valuation);
+    // Narrative generation (Call 3)
+    const report = generateReportNarrative({
+      websiteExtraction,
+      research,
+      scores,
+      valuation,
+    });
 
-    // Construct structured response
     const result: StructuredBackendResponse = {
       websiteExtraction,
-      scoring,
+      research,
+      scores,
       valuation,
-      report
+      report,
     };
 
     const duration = Date.now() - startTime;
-    console.log(`[${timestamp}] [ANALYZE] Response sent (duration: ${duration}ms):`, JSON.stringify({
-      sellReadinessScore: scoring.sellReadinessScore,
-      businessName: websiteExtraction.businessName
-    }, null, 2));
+    console.log(
+      `[${timestamp}] [ANALYZE] Response sent (duration: ${duration}ms):`,
+      JSON.stringify(
+        {
+          finalScore: scores.finalScore,
+          businessName: websiteExtraction.businessName,
+        },
+        null,
+        2
+      )
+    );
 
     res.json(result);
   } catch (error) {

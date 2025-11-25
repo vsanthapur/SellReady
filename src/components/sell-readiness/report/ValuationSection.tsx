@@ -1,11 +1,17 @@
-import { Valuation } from "@/types/analysis";
+import type { AnalysisResult } from "@/types/analysis";
 import { FileText } from "lucide-react";
 
 interface ValuationSectionProps {
-  valuation: Valuation;
+  valuation: AnalysisResult["valuation"];
+  industryMultiples: AnalysisResult["industryMultiples"];
+  profitabilityInsights: AnalysisResult["profitabilityInsights"];
 }
 
-export function ValuationSection({ valuation }: ValuationSectionProps) {
+export function ValuationSection({
+  valuation,
+  industryMultiples,
+  profitabilityInsights,
+}: ValuationSectionProps) {
   if (!valuation) return null;
 
   return (
@@ -26,31 +32,26 @@ export function ValuationSection({ valuation }: ValuationSectionProps) {
           </div>
         </div>
         
-        {/* Valuation Inputs */}
-        {valuation.valuationInputs && valuation.valuationInputs.length > 0 && (
-          <div className="pt-4 border-t border-border">
-            <h3 className="text-base font-semibold mb-3">Valuation Inputs</h3>
-            <ul className="list-disc pl-5 space-y-1 text-sm text-muted-foreground">
-              {valuation.valuationInputs.map((input, index) => (
-                <li key={index}>{input}</li>
-              ))}
-            </ul>
-          </div>
-        )}
+        {/* Industry Multiples */}
+        <div className="pt-4 border-t border-border">
+          <h3 className="text-base font-semibold mb-3">Industry Multiples</h3>
+          <ul className="list-disc pl-5 space-y-1 text-sm text-muted-foreground">
+            <li>Revenue multiples: {industryMultiples.revenueMultipleRange}</li>
+            <li>EBITDA multiples: {industryMultiples.ebitdaMultipleRange}</li>
+            <li>{industryMultiples.justification}</li>
+          </ul>
+        </div>
 
-        {/* Comparable Multiples */}
-        {valuation.comparableMultiples && valuation.comparableMultiples.length > 0 && (
-          <div className="pt-4 border-t border-border">
-            <h3 className="text-base font-semibold mb-3">Comparable Multiples</h3>
-            <div className="grid md:grid-cols-2 gap-4">
-              <ul className="list-disc pl-5 space-y-1 text-sm text-muted-foreground">
-                {valuation.comparableMultiples.map((multiple, index) => (
-                  <li key={index}>{multiple}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        )}
+        {/* Profitability Notes */}
+        <div className="pt-4 border-t border-border">
+          <h3 className="text-base font-semibold mb-3">Profitability Signals</h3>
+          <ul className="list-disc pl-5 space-y-1 text-sm text-muted-foreground">
+            {profitabilityInsights.descriptors.map((descriptor) => (
+              <li key={descriptor}>{descriptor}</li>
+            ))}
+            <li>{profitabilityInsights.industryProfitabilityNotes}</li>
+          </ul>
+        </div>
 
         {valuation.note && (
           <div className="pt-4 border-t border-border">

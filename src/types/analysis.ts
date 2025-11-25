@@ -1,46 +1,11 @@
 /**
- * Complete type definitions for Sell Readiness Analysis
- * These types match the backend API response structure
+ * Shared types between backend and frontend for the Sell Readiness flow.
  */
 
 export interface BusinessData {
   website: string;
   revenue: string;
   grossProfit: string;
-}
-
-export interface SubScores {
-  growthSignal: string;
-  profitQuality: string;
-  buyerFit: string;
-  growthScore: number;
-  profitScore: number;
-  buyerScore: number;
-}
-
-export interface Business {
-  name: string;
-  website: string;
-  revenue: string;
-  grossProfit: string;
-  products: string[];
-  segments: string[];
-}
-
-export interface Factors {
-  growth: string;
-  profitability: string;
-  marketTiming: string;
-  buyerAppetite: string;
-  ownerDependence: string;
-}
-
-export interface Valuation {
-  revenueRange: string;
-  profitRange: string;
-  note: string;
-  valuationInputs?: string[];
-  comparableMultiples?: string[];
 }
 
 export interface RecommendedAction {
@@ -64,60 +29,77 @@ export interface WebsiteExtraction {
 }
 
 /**
- * Score object with value, label, and justification
+ * Call 2 Research Output
  */
-export interface Score {
+export interface ScoringResearchOutput {
+  sgnaBand: {
+    low: number;
+    mid: number;
+    high: number;
+    justification: string;
+  };
+  industryMultiples: {
+    revenueMultipleRange: string;
+    ebitdaMultipleRange: string;
+    justification: string;
+  };
+  profitabilityInsights: {
+    descriptors: string[];
+    industryProfitabilityNotes: string;
+  };
+  growthScore: {
+    value: number;
+    justification: string;
+  };
+  marketTimingScore: {
+    value: number;
+    justification: string;
+  };
+  buyerAppetiteScore: {
+    value: number;
+    justification: string;
+  };
+  ownerDependenceScore: {
+    value: number;
+    justification: string;
+  };
+}
+
+export interface ProfitabilityMetrics {
+  grossMargin: number;
+  ebitdaMargin: number;
+  profitabilityScore: number;
+}
+
+export interface FactorScore {
   value: number;
-  label: string;
   justification: string;
 }
 
-/**
- * Subscores for UI display (derived from main scores)
- */
-export interface SubScore {
-  value: number;
-  label: string;
+export interface ProfitabilityScore extends FactorScore {
+  grossMargin: number;
+  ebitdaMargin: number;
 }
 
-/**
- * Scoring Output (LLM Call 2)
- */
-export interface Scoring {
-  growthScore: Score;
-  profitabilityScore: Score;
-  marketTimingScore: Score;
-  buyerAppetiteScore: Score;
-  ownerDependenceScore: Score;
-  subscores: {
-    growthSignal: SubScore;
-    profitQuality: SubScore;
-    buyerFit: SubScore;
-  };
-  sellReadinessScore: number;
+export interface FinalScoresOutput {
+  growth: FactorScore;
+  profitability: ProfitabilityScore;
+  marketTiming: FactorScore;
+  buyerAppetite: FactorScore;
+  ownerDependence: FactorScore;
+  finalScore: number;
 }
 
-/**
- * Valuation ranges and metadata
- */
 export interface ValuationRange {
   low: number;
   high: number;
 }
 
-/**
- * Valuation Output (Deterministic)
- */
 export interface ValuationOutput {
   revenueBased: ValuationRange;
   profitBased: ValuationRange;
-  valuationInputs: string[];
-  comparableMultiples: string[];
 }
 
-/**
- * Report Narrative Output (LLM Call 3)
- */
 export interface Report {
   executiveSummary: string;
   strengths: string[];
@@ -132,42 +114,27 @@ export interface Report {
   recommendedActions: RecommendedAction[];
 }
 
-/**
- * New Backend API response structure (structured LLM chain)
- */
+export interface CompetitivePositioning {
+  landscape?: string;
+  differentiators?: string[];
+  risks?: string[];
+}
+
 export interface StructuredBackendResponse {
   websiteExtraction: WebsiteExtraction;
-  scoring: Scoring;
+  research: ScoringResearchOutput;
+  scores: FinalScoresOutput;
   valuation: ValuationOutput;
   report: Report;
 }
 
 /**
- * Legacy Backend API response structure (for backward compatibility during transition)
- */
-export interface BackendResponse {
-  score: number;
-  readinessLabel: string;
-  scoreColor: string;
-  subScores: SubScores;
-  summaryNote: string;
-  business: Business;
-  executiveSummary: string;
-  strengths: string[];
-  risks: string[];
-  factors: Factors;
-  valuation: Valuation;
-  recommendedActions: RecommendedAction[];
-}
-
-/**
- * Frontend analysis result structure
+ * Frontend analysis result structure (transformed for UI)
  */
 export interface AnalysisResult {
   score: number;
   readinessLabel: string;
   scoreColor: string;
-  subScores: SubScores;
   summaryNote: string;
   businessName: string;
   website: string;
@@ -183,6 +150,13 @@ export interface AnalysisResult {
   marketTiming: string;
   buyerAppetite: string;
   ownerDependence: string;
-  valuation: Valuation;
+  scores: FinalScoresOutput;
+  industryMultiples: ScoringResearchOutput["industryMultiples"];
+  profitabilityInsights: ScoringResearchOutput["profitabilityInsights"];
+  valuation: {
+    revenueRange: string;
+    profitRange: string;
+    note: string;
+  };
   recommendedActions: RecommendedAction[];
 }

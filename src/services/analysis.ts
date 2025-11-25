@@ -1,4 +1,4 @@
-import type { AnalysisResult, StructuredBackendResponse, Valuation, WebsiteExtraction } from "@/types/analysis";
+import type { AnalysisResult, StructuredBackendResponse, WebsiteExtraction } from "@/types/analysis";
 
 export interface BusinessData {
   website: string;
@@ -121,11 +121,9 @@ export async function fetchSellReadiness(
 
     const data: StructuredBackendResponse = await response.json();
 
-    // Extract sell readiness score
-    const score = data.scoring.sellReadinessScore;
+    const score = data.scores.finalScore;
 
-    // Transform valuation to legacy format
-    const valuation: Valuation = {
+    const valuation = {
       revenueRange: formatValuationRange(
         data.valuation.revenueBased.low,
         data.valuation.revenueBased.high
@@ -135,24 +133,13 @@ export async function fetchSellReadiness(
         data.valuation.profitBased.high
       ),
       note: "Not a formal appraisal — approximate market ranges based on industry comps.",
-      valuationInputs: data.valuation.valuationInputs,
-      comparableMultiples: data.valuation.comparableMultiples
     };
 
-    // Transform backend response to match frontend interface
     return {
-      score: score,
+      score,
       readinessLabel: getReadinessLabel(score),
       scoreColor: getScoreColor(score),
-      subScores: {
-        growthSignal: data.scoring.subscores.growthSignal.label,
-        profitQuality: data.scoring.subscores.profitQuality.label,
-        buyerFit: data.scoring.subscores.buyerFit.label,
-        growthScore: data.scoring.subscores.growthSignal.value,
-        profitScore: data.scoring.subscores.profitQuality.value,
-        buyerScore: data.scoring.subscores.buyerFit.value,
-      },
-      summaryNote: "Your business shows strong readiness for a sale. With solid fundamentals and market positioning, you're well-positioned for a successful exit.",
+      summaryNote: data.report.executiveSummary,
       businessName: data.websiteExtraction.businessName,
       website: businessData.website,
       revenue: formatNumber(revenueNum),
@@ -167,7 +154,10 @@ export async function fetchSellReadiness(
       marketTiming: data.report.keyFactorsText.marketTiming,
       buyerAppetite: data.report.keyFactorsText.buyerAppetite,
       ownerDependence: data.report.keyFactorsText.ownerDependence,
-      valuation: valuation,
+      scores: data.scores,
+      industryMultiples: data.research.industryMultiples,
+      profitabilityInsights: data.research.profitabilityInsights,
+      valuation,
       recommendedActions: data.report.recommendedActions,
     };
   } catch (error) {

@@ -91,7 +91,11 @@ export function Step3Analysis({ analysis }: Step3AnalysisProps) {
         {/* Valuation */}
         {analysis.valuation && (
           <div className="pt-8 border-t border-border">
-            <ValuationSection valuation={analysis.valuation} />
+            <ValuationSection
+              valuation={analysis.valuation}
+              industryMultiples={analysis.industryMultiples}
+              profitabilityInsights={analysis.profitabilityInsights}
+            />
           </div>
         )}
 

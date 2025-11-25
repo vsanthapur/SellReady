@@ -1,4 +1,10 @@
-import type { WebsiteExtraction, Scoring, ValuationOutput, Report } from "../../types/analysis";
+import type {
+  WebsiteExtraction,
+  ScoringResearchOutput,
+  FinalScoresOutput,
+  ValuationOutput,
+  Report,
+} from "../../types/analysis";
 
 /**
  * Report Narrative Generator
@@ -11,17 +17,24 @@ import type { WebsiteExtraction, Scoring, ValuationOutput, Report } from "../../
  * @param valuation - Valuation data from deterministic calculation
  * @returns Report narrative with executive summary, strengths, risks, factors, and actions
  */
-export function generateReportNarrative(
-  websiteExtraction: WebsiteExtraction,
-  scoring: Scoring,
-  valuation: ValuationOutput
-): Report {
+interface NarrativeInput {
+  websiteExtraction: WebsiteExtraction;
+  research: ScoringResearchOutput;
+  scores: FinalScoresOutput;
+  valuation: ValuationOutput;
+}
+
+export function generateReportNarrative({
+  websiteExtraction,
+  research,
+  scores,
+  valuation,
+}: NarrativeInput): Report {
   const timestamp = new Date().toISOString();
-  console.log(`[${timestamp}] [CALL3] Report Narrative Generator - Input:`, JSON.stringify({
-    websiteExtraction,
-    scoring,
-    valuation
-  }, null, 2));
+  console.log(
+    `[${timestamp}] [CALL3] Report Narrative Generator - Input:`,
+    JSON.stringify({ websiteExtraction, research, scores, valuation }, null, 2)
+  );
 
   // Hardcoded output for now (will be replaced with LLM call)
   // Example output for Google
@@ -41,7 +54,11 @@ export function generateReportNarrative(
     ],
     keyFactorsText: {
       growth: "Moderate growth with stable customer demand.",
-      profitability: "Gross margin indicates healthy unit economics.",
+      profitability: `Gross margin of ${(scores.profitability.grossMargin * 100).toFixed(
+        1
+      )}% and EBITDA margin of ${(scores.profitability.ebitdaMargin * 100).toFixed(
+        1
+      )}% point to healthy unit economics.`,
       marketTiming: "Sector experiencing moderate consolidation.",
       buyerAppetite: "Several logical strategic acquirers exist.",
       ownerDependence: "Moderate owner involvement in operations."
