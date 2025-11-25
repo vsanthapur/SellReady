@@ -31,7 +31,7 @@ export function SummaryCard({
         <div>
           <h3 className="text-xl font-serif font-semibold mb-1">{businessName}</h3>
           <a
-            href={website}
+            href={website.startsWith("http") ? website : `https://${website}`}
             target="_blank"
             rel="noopener noreferrer"
             className="text-sm text-muted-foreground hover:underline"

@@ -3,7 +3,8 @@ import { Step1Website } from "@/components/sell-readiness/Step1Website";
 import { Step2Financials } from "@/components/sell-readiness/Step2Financials";
 import { Step3Analysis } from "@/components/sell-readiness/Step3Analysis";
 import { LoadingScreen } from "@/components/sell-readiness/LoadingScreen";
-import { fetchSellReadiness, AnalysisResult } from "@/services/analysis";
+import { fetchSellReadiness, fetchWebsiteExtraction, AnalysisResult } from "@/services/analysis";
+import type { WebsiteExtraction } from "@/types/analysis";
 
 type FlowStep = "website" | "financials" | "loading" | "analysis";
 
@@ -12,16 +13,23 @@ const Index = () => {
   const [website, setWebsite] = useState("");
   const [revenue, setRevenue] = useState("");
   const [grossProfit, setGrossProfit] = useState("");
+  const [websiteExtraction, setWebsiteExtraction] = useState<WebsiteExtraction | null>(null);
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
 
   const handleWebsiteSubmit = async (url: string) => {
     setWebsite(url);
     setCurrentStep("loading");
     
-    // Simulate analysis delay
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    
-    setCurrentStep("financials");
+    try {
+      // Phase 1: Website Intelligence Extraction (Call 1)
+      const extraction = await fetchWebsiteExtraction(url);
+      setWebsiteExtraction(extraction);
+      setCurrentStep("financials");
+    } catch (error) {
+      console.error("Error fetching website extraction:", error);
+      // On error, still proceed to financials step
+      setCurrentStep("financials");
+    }
   };
 
   const handleFinancialsSubmit = async (rev: string, gp: string) => {
@@ -29,15 +37,25 @@ const Index = () => {
     setGrossProfit(gp);
     setCurrentStep("loading");
 
-    // Fetch analysis (hardcoded for now)
-    const result = await fetchSellReadiness({
-      website,
-      revenue: rev,
-      grossProfit: gp
-    });
+    try {
+      // Phase 2: Complete analysis (Call 2, Valuation, Call 3)
+      // Pass websiteExtraction if available to skip Call 1
+      const result = await fetchSellReadiness(
+        {
+          website,
+          revenue: rev,
+          grossProfit: gp
+        },
+        websiteExtraction || undefined
+      );
 
-    setAnalysis(result);
-    setCurrentStep("analysis");
+      setAnalysis(result);
+      setCurrentStep("analysis");
+    } catch (error) {
+      console.error("Error fetching analysis:", error);
+      // Handle error appropriately
+      setCurrentStep("financials");
+    }
   };
 
   return (
@@ -47,7 +65,11 @@ const Index = () => {
       )}
 
       {currentStep === "financials" && (
-        <Step2Financials website={website} onNext={handleFinancialsSubmit} />
+        <Step2Financials 
+          website={website} 
+          websiteExtraction={websiteExtraction}
+          onNext={handleFinancialsSubmit} 
+        />
       )}
 
       {currentStep === "loading" && (

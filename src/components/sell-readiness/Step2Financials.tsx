@@ -6,13 +6,15 @@ import { SummaryCard } from "./SummaryCard";
 import { HowItWorksFooter } from "./HowItWorksFooter";
 import { CTAFooter } from "./CTAFooter";
 import { formatNumberWithCommas, parseFormattedNumber } from "@/lib/formatters";
+import type { WebsiteExtraction } from "@/types/analysis";
 
 interface Step2FinancialsProps {
   website: string;
+  websiteExtraction: WebsiteExtraction | null;
   onNext: (revenue: string, grossProfit: string) => void;
 }
 
-export function Step2Financials({ website, onNext }: Step2FinancialsProps) {
+export function Step2Financials({ website, websiteExtraction, onNext }: Step2FinancialsProps) {
   const [revenue, setRevenue] = useState("");
   const [grossProfit, setGrossProfit] = useState("");
   const [error, setError] = useState("");
@@ -101,12 +103,12 @@ export function Step2Financials({ website, onNext }: Step2FinancialsProps) {
 
           <div className="lg:sticky lg:top-8 h-fit">
             <SummaryCard
-              businessName="Your Business"
+              businessName={websiteExtraction?.businessName || "Your Business"}
               website={website}
               revenue={revenue || "—"}
               grossProfit={grossProfit || "—"}
-              products={["Service A", "Service B", "Product C"]}
-              markets={["SMB", "Enterprise", "Consumer"]}
+              products={websiteExtraction?.productsAndServices || []}
+              markets={websiteExtraction?.customerSegments || []}
             />
           </div>
         </div>

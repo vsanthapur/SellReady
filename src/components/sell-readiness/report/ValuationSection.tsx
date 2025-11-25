@@ -27,28 +27,30 @@ export function ValuationSection({ valuation }: ValuationSectionProps) {
         </div>
         
         {/* Valuation Inputs */}
-        <div className="pt-4 border-t border-border">
-          <h3 className="text-base font-semibold mb-3">Valuation Inputs</h3>
-          <ul className="list-disc pl-5 space-y-1 text-sm text-muted-foreground">
-            <li>Industry typical revenue multiples: 0.6×–0.72×</li>
-            <li>Industry typical profit multiples: 3×–4×</li>
-            <li>Business model suggests higher digital valuations</li>
-            <li>Strong margins and brand trust support the range</li>
-            <li>Owner dependence slightly reduces upper bound</li>
-          </ul>
-        </div>
-
-        {/* Comparable Multiples */}
-        <div className="pt-4 border-t border-border">
-          <h3 className="text-base font-semibold mb-3">Comparable Multiples</h3>
-          <div className="grid md:grid-cols-2 gap-4">
+        {valuation.valuationInputs && valuation.valuationInputs.length > 0 && (
+          <div className="pt-4 border-t border-border">
+            <h3 className="text-base font-semibold mb-3">Valuation Inputs</h3>
             <ul className="list-disc pl-5 space-y-1 text-sm text-muted-foreground">
-              <li>Local services: 2.5×–3.5× SDE</li>
-              <li>Digital businesses: 3×–5× EBITDA</li>
-              <li>Consumer retail: 0.5×–1× revenue</li>
+              {valuation.valuationInputs.map((input, index) => (
+                <li key={index}>{input}</li>
+              ))}
             </ul>
           </div>
-        </div>
+        )}
+
+        {/* Comparable Multiples */}
+        {valuation.comparableMultiples && valuation.comparableMultiples.length > 0 && (
+          <div className="pt-4 border-t border-border">
+            <h3 className="text-base font-semibold mb-3">Comparable Multiples</h3>
+            <div className="grid md:grid-cols-2 gap-4">
+              <ul className="list-disc pl-5 space-y-1 text-sm text-muted-foreground">
+                {valuation.comparableMultiples.map((multiple, index) => (
+                  <li key={index}>{multiple}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        )}
 
         {valuation.note && (
           <div className="pt-4 border-t border-border">

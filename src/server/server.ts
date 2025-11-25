@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import { analyzeHandler } from "./routes/analyze";
+import { analyzeStartHandler } from "./routes/analyzeStart";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -25,6 +26,7 @@ app.get("/health", (req, res) => {
 });
 
 // API routes
+app.post("/api/analyze/start", analyzeStartHandler);
 app.post("/api/analyze", analyzeHandler);
 
 // Start server
