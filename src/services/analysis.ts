@@ -132,7 +132,7 @@ export async function fetchSellReadiness(
         data.valuation.profitBased.low,
         data.valuation.profitBased.high
       ),
-      note: "Not a formal appraisal — approximate market ranges based on industry comps.",
+      note: "Not a formal appraisal — approximate market ranges based on industry comps. Estimated EBITDA is derived from your gross margin minus typical SG&A levels for your industry.",
     };
 
     return {
@@ -158,6 +158,7 @@ export async function fetchSellReadiness(
       industryMultiples: data.research.industryMultiples,
       profitabilityInsights: data.research.profitabilityInsights,
       valuation,
+      sgnaBand: data.research.sgnaBand,
       recommendedActions: data.report.recommendedActions,
     };
   } catch (error) {

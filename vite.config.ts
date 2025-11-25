@@ -15,4 +15,8 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  css: {
+    preprocessorOptions: {},
+  },
+  assetsInclude: ["**/*.jpg", "**/*.jpeg"],
 }));

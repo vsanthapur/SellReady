@@ -30,7 +30,7 @@ export async function analyzeStartHandler(req: Request, res: Response) {
 
     // Step 1: Website Intelligence Extraction (LLM Call 1)
     console.log(`[${timestamp}] [ANALYZE_START] Starting website extraction...`);
-    const websiteExtraction = extractWebsiteIntelligence(website);
+    const websiteExtraction = await extractWebsiteIntelligence(website);
 
     console.log(`[${timestamp}] [ANALYZE_START] Website extraction completed`);
 

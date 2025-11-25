@@ -1,73 +1,130 @@
-# Welcome to your Lovable project
+# SellReady
 
-## Project info
+SellReady is an AI-assisted “sell readiness” analyzer for small businesses.  
+Users enter a website, revenue, and gross profit; the backend simulates a 3-step LLM chain to extract business intelligence, research industry dynamics, run deterministic profitability + valuation math, and produce banker-style narratives with actionable recommendations. The frontend renders the complete report (score, factors, valuation ranges, strengths/risks, recommended actions) and supports PDF export.
 
-**URL**: https://lovable.dev/projects/a8de296a-f0a0-49c0-b7dc-b4da697e73dd
+---
 
-## How can I edit this code?
+## Architecture Overview
 
-There are several ways of editing your application.
+1. **Call 1 – Website Extraction (LLM)**  
+   Extracts business metadata from the website and public context.
 
-**Use Lovable**
+2. **Call 2 – Research (LLM)**  
+   Supplies SG&A bands, industry multiples, profitability descriptors, and preliminary factor scores (growth, timing, buyer appetite, owner dependence).
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/a8de296a-f0a0-49c0-b7dc-b4da697e73dd) and start prompting.
+3. **Deterministic Engines (Node/Express)**  
+   - `profitabilityEngine.ts`: derives gross margin, estimated EBITDA margin, and profitability score.  
+   - `scoringEngine.ts`: combines the five factors into the final Sell Readiness Score.  
+   - `valuation.ts`: applies LLM-provided multiples plus the computed EBITDA margin to produce revenue- and EBITDA-based valuation ranges.
 
-Changes made via Lovable will be committed automatically to this repo.
+4. **Call 3 – Narrative Generation (LLM)**  
+   Uses all structured outputs to write the executive summary, strengths/risks, key factor blurbs, and recommended actions.
 
-**Use your preferred IDE**
+5. **Frontend (Vite + React + shadcn-ui)**  
+   Displays the full report, handles the two-step user flow, and offers a “Download Report” PDF export.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+---
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## Tech Stack
 
-Follow these steps:
+- **Frontend:** Vite, React, TypeScript, Tailwind CSS, shadcn-ui  
+- **Backend:** Express-style logic running as Node server/serverless functions  
+- **LLM Provider:** OpenAI Chat Completions API (GPT-5.1)  
+- **PDF Export:** `html2canvas` + `jspdf`
+
+---
+
+## Prerequisites
+
+- Node.js 18+ (use [`nvm`](https://github.com/nvm-sh/nvm#installing-and-updating) if you don’t have it).  
+- An OpenAI API key with access to GPT‑5.1 or whichever model you configure.
+
+---
+
+## Installation
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+# Clone the repo
+git clone https://github.com/<your-org>/sellready.git
+cd sellready
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# Install dependencies
+npm install
+```
 
-# Step 3: Install the necessary dependencies.
-npm i
+### Environment Variables
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+Create a `.env` file (see `.env.example`) with:
+
+```
+OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxx
+VITE_API_URL=http://localhost:3001
+```
+
+`OPENAI_API_KEY` is required for the backend; `VITE_API_URL` tells the frontend where to reach the API.
+
+---
+
+## Local Development
+
+Frontend and backend run separately:
+
+```sh
+# Terminal 1 – API (Express server on http://localhost:3001)
+npm run server
+
+# Terminal 2 – Vite dev server (http://localhost:5173)
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The Step 1 flow calls `POST /api/analyze/start`; after revenue/gross profit are entered, Step 2 calls `POST /api/analyze`. The UI expects the backend to be reachable at the URL specified in `VITE_API_URL`.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+---
 
-**Use GitHub Codespaces**
+## Building for Production
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```sh
+npm run build       # Produces the Vite static build in dist/
+npm run preview     # Optional: preview the static build locally
+```
 
-## What technologies are used for this project?
+For deployment:
+- Host the frontend (contents of `dist/`) on any static host (Vercel, Netlify, S3 + CloudFront, etc.).  
+- Deploy the Express API as serverless functions (Vercel, AWS Lambda, etc.) or a Node server; just export the endpoints defined in `src/server/routes/`.  
+- Set `OPENAI_API_KEY` and `VITE_API_URL` (pointing to your deployed API).
 
-This project is built with:
+---
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Project Structure Highlights
 
-## How can I deploy this project?
+```
+/src
+  /server
+    /logic            # Call 1–3 orchestration, deterministic engines
+    /prompts          # System prompts for each LLM call
+    /routes           # Express handlers (analyze/start + analyze)
+  /components         # React UI
+  /services           # Frontend fetch logic
+  /types              # Shared TypeScript interfaces
+```
 
-Simply open [Lovable](https://lovable.dev/projects/a8de296a-f0a0-49c0-b7dc-b4da697e73dd) and click on Share -> Publish.
+- `src/server/prompts/*.ts` contain the exact system prompts for each LLM call.  
+- `src/server/logic/*.ts` encapsulate the sequential steps (website extraction, research, profitability/valuation, narrative).  
+- `src/components/sell-readiness/Step3Analysis.tsx` is the main report page, while `src/components/sell-readiness/report/*` holds the report sections.
 
-## Can I connect a custom domain to my Lovable project?
+---
 
-Yes, you can!
+## PDF Export
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+Clicking “Download Report” in Step 3 captures the entire report container via `html2canvas`, stitches it into a multi-page PDF with `jspdf`, and saves it locally. This works client-side; no backend required.
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+---
+
+## Questions / Next Steps
+
+- Configure rate limits or caching if you expect heavy LLM usage.  
+- Swap in your preferred LLM provider by replacing the OpenAI client in `src/server/lib/openaiClient.ts`.  
+- For production, consider running the API as serverless functions to take advantage of automatic scaling.
+
+Happy shipping!

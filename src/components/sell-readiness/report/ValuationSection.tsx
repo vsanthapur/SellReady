@@ -5,12 +5,16 @@ interface ValuationSectionProps {
   valuation: AnalysisResult["valuation"];
   industryMultiples: AnalysisResult["industryMultiples"];
   profitabilityInsights: AnalysisResult["profitabilityInsights"];
+  sgnaBand?: AnalysisResult["sgnaBand"];
+  estimatedEbitdaMargin?: number;
 }
 
 export function ValuationSection({
   valuation,
   industryMultiples,
   profitabilityInsights,
+  sgnaBand,
+  estimatedEbitdaMargin,
 }: ValuationSectionProps) {
   if (!valuation) return null;
 
@@ -27,7 +31,7 @@ export function ValuationSection({
             <div className="text-lg font-semibold">{valuation.revenueRange}</div>
           </div>
           <div>
-            <div className="text-sm text-muted-foreground mb-1">Profit-Based Range</div>
+            <div className="text-sm text-muted-foreground mb-1">EBITDA-Based Range</div>
             <div className="text-lg font-semibold">{valuation.profitRange}</div>
           </div>
         </div>
@@ -39,6 +43,17 @@ export function ValuationSection({
             <li>Revenue multiples: {industryMultiples.revenueMultipleRange}</li>
             <li>EBITDA multiples: {industryMultiples.ebitdaMultipleRange}</li>
             <li>{industryMultiples.justification}</li>
+            {typeof estimatedEbitdaMargin === "number" && (
+              <li>
+                Estimated EBITDA margin from your inputs: {(estimatedEbitdaMargin * 100).toFixed(1)}%
+              </li>
+            )}
+            {sgnaBand && (
+              <li>
+                Typical SG&A range for this sector: {sgnaBand.low}% – {sgnaBand.high}% (midpoint{" "}
+                {sgnaBand.mid}%)
+              </li>
+            )}
           </ul>
         </div>
 

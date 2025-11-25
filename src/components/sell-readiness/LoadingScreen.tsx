@@ -4,9 +4,19 @@ interface LoadingScreenProps {
   website: string;
   revenue: string;
   grossProfit: string;
+  businessName?: string;
+  products?: string[];
+  markets?: string[];
 }
 
-export function LoadingScreen({ website, revenue, grossProfit }: LoadingScreenProps) {
+export function LoadingScreen({
+  website,
+  revenue,
+  grossProfit,
+  businessName,
+  products = [],
+  markets = [],
+}: LoadingScreenProps) {
   return (
     <div className="min-h-screen bg-background py-12 px-4">
       <div className="container mx-auto max-w-7xl">
@@ -25,12 +35,12 @@ export function LoadingScreen({ website, revenue, grossProfit }: LoadingScreenPr
 
           <div className="lg:sticky lg:top-8 h-fit">
             <SummaryCard
-              businessName="Your Business"
+              businessName={businessName || "Your Business"}
               website={website}
               revenue={revenue}
               grossProfit={grossProfit}
-              products={[]}
-              markets={[]}
+              products={products}
+              markets={markets}
             />
           </div>
         </div>

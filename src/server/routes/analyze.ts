@@ -54,11 +54,15 @@ export async function analyzeHandler(req: Request, res: Response) {
       websiteExtraction = req.body.websiteExtraction;
     } else {
       console.log(`[${timestamp}] [ANALYZE] Starting LLM chain...`);
-      websiteExtraction = extractWebsiteIntelligence(website);
+      websiteExtraction = await extractWebsiteIntelligence(website);
     }
 
     // Step 2: LLM research (Call 2)
-    const research: ScoringResearchOutput = runScoringResearch(revenue, grossProfit, websiteExtraction);
+    const research: ScoringResearchOutput = await runScoringResearch(
+      revenue,
+      grossProfit,
+      websiteExtraction
+    );
 
     // Backend profitability math
     const profitability = computeProfitabilityScore(revenue, grossProfit, research.sgnaBand.mid);
@@ -76,10 +80,10 @@ export async function analyzeHandler(req: Request, res: Response) {
     console.log(`[${timestamp}] [SCORING_ENGINE] Scores:`, JSON.stringify(scores, null, 2));
 
     // Deterministic valuation
-    const valuation = calculateValuation(revenue, grossProfit);
+    const valuation = calculateValuation(revenue, profitability, research.industryMultiples);
 
     // Narrative generation (Call 3)
-    const report = generateReportNarrative({
+    const report = await generateReportNarrative({
       websiteExtraction,
       research,
       scores,

@@ -49,6 +49,12 @@ const Index = () => {
         websiteExtraction || undefined
       );
 
+      if (websiteExtraction) {
+        result.businessName = websiteExtraction.businessName || result.businessName;
+        result.products = websiteExtraction.productsAndServices || result.products;
+        result.markets = websiteExtraction.customerSegments || result.markets;
+      }
+
       setAnalysis(result);
       setCurrentStep("analysis");
     } catch (error) {
@@ -77,11 +83,14 @@ const Index = () => {
           website={website}
           revenue={revenue}
           grossProfit={grossProfit}
+          businessName={websiteExtraction?.businessName}
+          products={websiteExtraction?.productsAndServices}
+          markets={websiteExtraction?.customerSegments}
         />
       )}
 
       {currentStep === "analysis" && analysis && (
-        <Step3Analysis analysis={analysis} />
+        <Step3Analysis analysis={analysis} initialWebsiteExtraction={websiteExtraction} />
       )}
     </>
   );

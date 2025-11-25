@@ -1,6 +1,7 @@
 import { AnalysisResult } from "@/services/analysis";
+import type { WebsiteExtraction } from "@/types/analysis";
 import { SummaryCard } from "./SummaryCard";
-import { TrendingUp } from "lucide-react";
+import { TrendingUp, Download } from "lucide-react";
 import { HowItWorksFooter } from "./HowItWorksFooter";
 import { CTAFooter } from "./CTAFooter";
 import { ScoreSection } from "./report/ScoreSection";
@@ -9,9 +10,14 @@ import { ExecutiveSummary } from "./report/ExecutiveSummary";
 import { StrengthsRisksSection } from "./report/StrengthsRisksSection";
 import { ValuationSection } from "./report/ValuationSection";
 import { RecommendedActions } from "./report/RecommendedActions";
+import { Button } from "@/components/ui/button";
+import { useRef, useState } from "react";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 interface Step3AnalysisProps {
   analysis: AnalysisResult;
+  initialWebsiteExtraction?: WebsiteExtraction | null;
 }
 
 function FactorCard({ title, description }: { title: string; description: string }) {
@@ -23,19 +29,68 @@ function FactorCard({ title, description }: { title: string; description: string
   );
 }
 
-export function Step3Analysis({ analysis }: Step3AnalysisProps) {
+export function Step3Analysis({ analysis, initialWebsiteExtraction }: Step3AnalysisProps) {
+  const reportRef = useRef<HTMLDivElement>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleDownloadReport = async () => {
+    if (!reportRef.current) return;
+    try {
+      setIsDownloading(true);
+      const canvas = await html2canvas(reportRef.current, {
+        scale: 2,
+        backgroundColor: "#ffffff",
+        useCORS: true,
+      });
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      let heightLeft = pdfHeight;
+      let position = 0;
+
+      pdf.addImage(imgData, "PNG", 0, position, pdfWidth, pdfHeight);
+      heightLeft -= pdf.internal.pageSize.getHeight();
+
+      while (heightLeft > 0) {
+        position = heightLeft - pdfHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "PNG", 0, position, pdfWidth, pdfHeight);
+        heightLeft -= pdf.internal.pageSize.getHeight();
+      }
+
+      const safeName = (analysis.businessName || "sell-readiness").replace(/\s+/g, "-");
+      pdf.save(`${safeName}-report.pdf`);
+    } catch (error) {
+      console.error("Failed to generate PDF", error);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background py-8 px-4">
-      <div className="container mx-auto max-w-7xl space-y-8">
+      <div className="container mx-auto max-w-7xl space-y-8" ref={reportRef}>
         {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-3xl font-serif font-semibold mb-2 tracking-tight">
-            Sell Readiness Report for {analysis.businessName}
-          </h1>
-          <p className="text-base text-muted-foreground leading-relaxed">
-            Based on our analysis of your business, market conditions, and financial health,
-            here's your comprehensive sell readiness assessment.
-          </p>
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-3xl font-serif font-semibold mb-2 tracking-tight">
+              Sell Readiness Report for {analysis.businessName}
+            </h1>
+            <p className="text-base text-muted-foreground leading-relaxed">
+              Based on our analysis of your business, market conditions, and financial health,
+              here's your comprehensive sell readiness assessment.
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            onClick={handleDownloadReport}
+            disabled={isDownloading}
+            className="flex items-center gap-2 w-full sm:w-auto"
+          >
+            <Download className="w-4 h-4" />
+            {isDownloading ? "Preparing PDF..." : "Download Report"}
+          </Button>
         </div>
 
         {/* Two Column Layout: Score (left) + Summary Card (right) */}
@@ -48,12 +103,12 @@ export function Step3Analysis({ analysis }: Step3AnalysisProps) {
           {/* Summary Card - Right Side */}
           <div className="lg:w-[540px] lg:sticky lg:top-8 h-fit">
             <SummaryCard
-              businessName={analysis.businessName}
+              businessName={initialWebsiteExtraction?.businessName ?? analysis.businessName}
               website={analysis.website}
               revenue={analysis.revenue}
               grossProfit={analysis.grossProfit}
-              products={analysis.products}
-              markets={analysis.markets}
+              products={initialWebsiteExtraction?.productsAndServices ?? analysis.products}
+              markets={initialWebsiteExtraction?.customerSegments ?? analysis.markets}
             />
           </div>
         </div>
@@ -101,6 +156,8 @@ export function Step3Analysis({ analysis }: Step3AnalysisProps) {
               valuation={analysis.valuation}
               industryMultiples={analysis.industryMultiples}
               profitabilityInsights={analysis.profitabilityInsights}
+              sgnaBand={analysis.sgnaBand}
+              estimatedEbitdaMargin={analysis.scores.profitability.ebitdaMargin}
             />
           </div>
         )}

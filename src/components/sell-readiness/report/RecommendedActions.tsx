@@ -30,7 +30,7 @@ export function RecommendedActions({ recommendedActions }: RecommendedActionsPro
         <CheckCircle2 className="w-5 h-5" />
         Recommended Actions
       </h2>
-      <div className="grid md:grid-cols-2 gap-6 items-stretch">
+      <div className="grid md:grid-cols-[minmax(0,2fr),minmax(0,1fr)] gap-6 items-start">
         {/* Left Column: Recommended Actions */}
         <div className="space-y-4 flex flex-col">
           {recommendedActions.map((action, index) => (
@@ -42,12 +42,12 @@ export function RecommendedActions({ recommendedActions }: RecommendedActionsPro
         </div>
 
         {/* Right Column: Interested In Selling? CTA */}
-        <div className="bg-card border border-border rounded-lg p-6 flex flex-col">
+        <div className="bg-card border border-border rounded-lg p-6 flex flex-col max-w-lg">
           <h3 className="text-lg font-serif font-semibold mb-3">Interested In Selling?</h3>
           <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
             Ready to take the next step? Our team can help you navigate the sale process and maximize your business value.
           </p>
-          <form onSubmit={handleSubmit} className="space-y-4 flex-1 flex flex-col">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label htmlFor="firstName" className="text-sm font-medium mb-1 block">
@@ -98,11 +98,9 @@ export function RecommendedActions({ recommendedActions }: RecommendedActionsPro
                 required
               />
             </div>
-            <div className="mt-auto">
-              <Button type="submit" className="w-full">
-                Discuss Your Options
-              </Button>
-            </div>
+            <Button type="submit" className="w-full">
+              Discuss Your Options
+            </Button>
           </form>
         </div>
       </div>

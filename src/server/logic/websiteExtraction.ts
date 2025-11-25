@@ -1,49 +1,40 @@
 import type { WebsiteExtraction } from "../../types/analysis";
+import { openai } from "../lib/openaiClient";
+import { websiteExtractionSystemPrompt } from "../prompts";
 
-/**
- * Website Intelligence Extraction
- * Analyzes the website and extracts business metadata
- * 
- * TODO: Replace hardcoded output with actual LLM call
- * 
- * @param website - The website URL to analyze
- * @returns Website extraction data
- */
-export function extractWebsiteIntelligence(website: string): WebsiteExtraction {
+export async function extractWebsiteIntelligence(website: string): Promise<WebsiteExtraction> {
   const timestamp = new Date().toISOString();
-  console.log(`[${timestamp}] [CALL1] Website Intelligence Extraction - Input:`, JSON.stringify({ website }, null, 2));
+  console.log(
+    `[${timestamp}] [CALL1] Website Intelligence Extraction - Input:`,
+    JSON.stringify({ website }, null, 2)
+  );
 
-  // Hardcoded output for now (will be replaced with LLM call)
-  // Example output for Google
-  const result: WebsiteExtraction = {
-    businessName: "Google Inc.",
-    industry: "Internet Services & Software",
-    businessModel: "Digital advertising, cloud services, consumer software",
-    productsAndServices: [
-      "Search engine",
-      "Cloud services",
-      "Advertising tools",
-      "Productivity software"
-    ],
-    customerSegments: [
-      "SMB",
-      "Enterprise",
-      "Consumer"
-    ],
-    marketKeywords: [
-      "global tech",
-      "AI",
-      "cloud computing",
-      "SaaS",
-      "digital advertising"
-    ],
-    recurringRevenueSignals: ["Cloud service subscriptions"],
-    ownerDependenceIndicators: [],
-    rawAnalysisNotes: "Large-scale digital service provider with diversified revenue."
+  const userPayload = {
+    website,
   };
 
-  console.log(`[${timestamp}] [CALL1] Website Intelligence Extraction - Output:`, JSON.stringify(result, null, 2));
-  
+  const completion = await openai.chat.completions.create({
+    model: "gpt-5.1",
+    temperature: 0.2,
+    response_format: { type: "json_object" },
+    messages: [
+      { role: "system", content: websiteExtractionSystemPrompt },
+      { role: "user", content: JSON.stringify(userPayload) },
+    ],
+  });
+
+  const content = completion.choices[0]?.message?.content;
+  if (!content) {
+    throw new Error("Website extraction LLM returned empty response");
+  }
+
+  const result = JSON.parse(content) as WebsiteExtraction;
+
+  console.log(
+    `[${timestamp}] [CALL1] Website Intelligence Extraction - Output:`,
+    JSON.stringify(result, null, 2)
+  );
+
   return result;
 }
 

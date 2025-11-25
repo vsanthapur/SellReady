@@ -1,33 +1,50 @@
-import type { ValuationOutput, ValuationRange } from "../../types/analysis";
+import type {
+  ValuationOutput,
+  ValuationRange,
+  ScoringResearchOutput,
+  ProfitabilityMetrics,
+} from "../../types/analysis";
 
-/**
- * Deterministic Valuation Calculation
- * Computes valuation ranges based on revenue and profit multiples
- * 
- * Revenue-Based Range: revenue * 0.6 → revenue * 0.72
- * Profit-Based Range: grossProfit * 3 → grossProfit * 4.2
- * 
- * @param revenue - Annual revenue
- * @param grossProfit - Gross profit
- * @returns Valuation ranges and metadata
- */
-export function calculateValuation(revenue: number, grossProfit: number): ValuationOutput {
+function parseMultipleRange(range: string, fallbackLow: number, fallbackHigh: number): ValuationRange {
+  if (!range) {
+    return { low: fallbackLow, high: fallbackHigh };
+  }
+
+  const cleaned = range.replace(/x/gi, "").trim();
+  const [lowStr, highStr] = cleaned.split(/[\u2013\u2014-]/).map((value) => parseFloat(value.trim()));
+
+  const low = Number.isFinite(lowStr) ? lowStr : fallbackLow;
+  const high = Number.isFinite(highStr) ? highStr : low;
+
+  return {
+    low: low || fallbackLow,
+    high: high || fallbackHigh,
+  };
+}
+
+export function calculateValuation(
+  revenue: number,
+  profitability: ProfitabilityMetrics,
+  industryMultiples: ScoringResearchOutput["industryMultiples"]
+): ValuationOutput {
   const timestamp = new Date().toISOString();
   console.log(
     `[${timestamp}] [VALUATION] Deterministic Valuation - Input:`,
-    JSON.stringify({ revenue, grossProfit }, null, 2)
+    JSON.stringify({ revenue, profitability, industryMultiples }, null, 2)
   );
 
-  // Calculate revenue-based range
+  const revenueMultiples = parseMultipleRange(industryMultiples.revenueMultipleRange, 0.6, 0.72);
+  const ebitdaMultiples = parseMultipleRange(industryMultiples.ebitdaMultipleRange, 3, 4.2);
+
   const revenueBased: ValuationRange = {
-    low: Math.round(revenue * 0.6),
-    high: Math.round(revenue * 0.72)
+    low: Math.round(revenue * revenueMultiples.low),
+    high: Math.round(revenue * revenueMultiples.high),
   };
 
-  // Calculate profit-based range
+  const estimatedEbitda = revenue * profitability.ebitdaMargin;
   const profitBased: ValuationRange = {
-    low: Math.round(grossProfit * 3),
-    high: Math.round(grossProfit * 4.2)
+    low: Math.round(estimatedEbitda * ebitdaMultiples.low),
+    high: Math.round(estimatedEbitda * ebitdaMultiples.high),
   };
 
   const result: ValuationOutput = {

@@ -153,6 +153,7 @@ export interface AnalysisResult {
   scores: FinalScoresOutput;
   industryMultiples: ScoringResearchOutput["industryMultiples"];
   profitabilityInsights: ScoringResearchOutput["profitabilityInsights"];
+  sgnaBand: ScoringResearchOutput["sgnaBand"];
   valuation: {
     revenueRange: string;
     profitRange: string;
