@@ -4,6 +4,7 @@ import { TrendingUp } from "lucide-react";
 import { HowItWorksFooter } from "./HowItWorksFooter";
 import { CTAFooter } from "./CTAFooter";
 import { ScoreSection } from "./report/ScoreSection";
+import { ScoreBreakdown } from "./report/ScoreBreakdown";
 import { ExecutiveSummary } from "./report/ExecutiveSummary";
 import { StrengthsRisksSection } from "./report/StrengthsRisksSection";
 import { ValuationSection } from "./report/ValuationSection";
@@ -38,12 +39,14 @@ export function Step3Analysis({ analysis }: Step3AnalysisProps) {
         </div>
 
         {/* Two Column Layout: Score (left) + Summary Card (right) */}
-        <div className="grid lg:grid-cols-[1fr,500px] gap-8">
+        <div className="flex flex-col lg:flex-row lg:justify-center gap-10">
           {/* Score Card - Left Side */}
-          <ScoreSection analysis={analysis} />
+          <div className="w-full lg:w-[540px]">
+            <ScoreSection analysis={analysis} />
+          </div>
 
           {/* Summary Card - Right Side */}
-          <div className="lg:sticky lg:top-8 h-fit">
+          <div className="lg:w-[540px] lg:sticky lg:top-8 h-fit">
             <SummaryCard
               businessName={analysis.businessName}
               website={analysis.website}
@@ -54,6 +57,9 @@ export function Step3Analysis({ analysis }: Step3AnalysisProps) {
             />
           </div>
         </div>
+
+        {/* Score Breakdown */}
+        <ScoreBreakdown analysis={analysis} />
 
         {/* Executive Summary - Full width after score section */}
         {analysis.executiveSummary && (
