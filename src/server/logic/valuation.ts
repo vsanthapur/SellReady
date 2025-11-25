@@ -3,7 +3,7 @@ import type {
   ValuationRange,
   ScoringResearchOutput,
   ProfitabilityMetrics,
-} from "../../types/analysis";
+} from "../../types/analysis.js";
 
 function parseMultipleRange(range: string, fallbackLow: number, fallbackHigh: number): ValuationRange {
   if (!range) {

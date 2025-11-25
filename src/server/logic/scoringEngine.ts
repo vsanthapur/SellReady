@@ -3,8 +3,8 @@ import type {
   FinalScoresOutput,
   FactorScore,
   ProfitabilityScore,
-} from "../../types/analysis";
-import type { ProfitabilityMetrics } from "./profitabilityEngine";
+} from "../../types/analysis.js";
+import type { ProfitabilityMetrics } from "./profitabilityEngine.js";
 
 const WEIGHTS = {
   growth: 0.3,

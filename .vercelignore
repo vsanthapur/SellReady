@@ -1,0 +1,33 @@
+# Vercel ignore file
+# Files/directories to exclude from Vercel deployments
+
+# Development files
+.env.local
+.env.development
+.env.test
+
+# Build artifacts (Vercel will rebuild)
+dist
+.vercel
+
+# Development server files
+src/server/server.ts
+
+# Documentation
+*.md
+!README.md
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+

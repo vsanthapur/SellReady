@@ -11,7 +11,8 @@ export type { AnalysisResult };
 
 import { parseFormattedNumber } from "@/lib/formatters";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
+// Use VITE_API_URL if set, otherwise use relative paths in production or localhost in development
+const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:3001" : "");
 
 /**
  * Fetches website intelligence extraction (Phase 1)

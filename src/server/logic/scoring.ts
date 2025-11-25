@@ -1,6 +1,6 @@
-import type { WebsiteExtraction, ScoringResearchOutput } from "../../types/analysis";
-import { openai } from "../lib/openaiClient";
-import { scoringResearchSystemPrompt } from "../prompts";
+import type { WebsiteExtraction, ScoringResearchOutput } from "../../types/analysis.js";
+import { openai } from "../lib/openaiClient.js";
+import { scoringResearchSystemPrompt } from "../prompts/index.js";
 
 export async function runScoringResearch(
   revenue: number,

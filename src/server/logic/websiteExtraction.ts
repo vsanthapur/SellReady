@@ -1,6 +1,6 @@
-import type { WebsiteExtraction } from "../../types/analysis";
-import { openai } from "../lib/openaiClient";
-import { websiteExtractionSystemPrompt } from "../prompts";
+import type { WebsiteExtraction } from "../../types/analysis.js";
+import { openai } from "../lib/openaiClient.js";
+import { websiteExtractionSystemPrompt } from "../prompts/index.js";
 
 export async function extractWebsiteIntelligence(website: string): Promise<WebsiteExtraction> {
   const timestamp = new Date().toISOString();

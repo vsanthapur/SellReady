@@ -4,9 +4,9 @@ import type {
   FinalScoresOutput,
   ValuationOutput,
   Report,
-} from "../../types/analysis";
-import { openai } from "../lib/openaiClient";
-import { reportNarrativeSystemPrompt } from "../prompts";
+} from "../../types/analysis.js";
+import { openai } from "../lib/openaiClient.js";
+import { reportNarrativeSystemPrompt } from "../prompts/index.js";
 
 interface NarrativeInput {
   websiteExtraction: WebsiteExtraction;
