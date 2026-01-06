@@ -3,6 +3,8 @@
 SellReady is an AI-assisted "sell readiness" analyzer for small businesses.  
 Users enter a website, revenue, and gross profit; the backend simulates a 3-step LLM chain to extract business intelligence, research industry dynamics, run deterministic profitability + valuation math, and produce banker-style narratives with actionable recommendations. The frontend renders the complete report (score, factors, valuation ranges, strengths/risks, recommended actions) and supports PDF export.
 
+sell-ready.vercel.app/
+
 ---
 
 ## High-Level Overview
