@@ -9,7 +9,6 @@ export function CTAFooter() {
             <h2 className="text-3xl font-serif font-semibold mb-3">
               Interested in selling your business?
             </h2>
-            <p className="text-muted-foreground">Learn more about OffDeal</p>
           </div>
           <Button size="lg" className="px-8 h-12 bg-primary hover:bg-primary/90">
             Get in touch

@@ -1,28 +1,191 @@
 # SellReady
 
-SellReady is an AI-assisted “sell readiness” analyzer for small businesses.  
+SellReady is an AI-assisted "sell readiness" analyzer for small businesses.  
 Users enter a website, revenue, and gross profit; the backend simulates a 3-step LLM chain to extract business intelligence, research industry dynamics, run deterministic profitability + valuation math, and produce banker-style narratives with actionable recommendations. The frontend renders the complete report (score, factors, valuation ranges, strengths/risks, recommended actions) and supports PDF export.
+
+---
+
+## High-Level Overview
+
+This architecture uses **three LLM calls** and **two deterministic engines**, ensuring that LLMs focus on research and narrative rather than math. While newer models can handle calculations, the deterministic approach prevents hallucination and ensures consistent, verifiable results.
+
+The tool is designed to be lightweight and accessible—users only need to provide **Annual Revenue** and **Gross Profit**. The system then deterministically estimates missing operational metrics (like EBITDA and SG&A effects) using industry norms researched by the LLM.
+
+The system flow:
+
+```
+Step 1 → User enters a website
+   ↓
+CALL 1: Website Extraction LLM
+   ↓
+Step 2 → User enters revenue + gross profit
+   ↓
+CALL 2: Research LLM
+   ↓
+Backend deterministic profitability + valuation calculations
+   ↓
+CALL 3: Narrative Generation LLM
+   ↓
+Frontend displays the full Sell Readiness Report
+```
+
+All three system prompts are stored in `src/server/prompts/` and are used by the backend during each LLM call.
+
+---
+
+## Sell Readiness Score Formula
+
+The Final Sell Readiness Score is computed **deterministically**:
+
+```
+Sell Readiness Score =
+0.3 * GrowthScore
++ 0.2 * ProfitabilityScore
++ 0.2 * MarketTimingScore
++ 0.2 * BuyerAppetiteScore
++ 0.1 * OwnerDependenceScore
+```
+
+Each component is a 0–100 integer.
+
+### Score Components
+
+- **GrowthScore** (LLM determines): How fast the industry is growing + how scalable the business is. LLM judges based on industry trends, demand, and model scalability.
+
+- **ProfitabilityScore** (Calculated): Based on gross margin and estimated EBITDA margin (using LLM-researched SG&A band). The LLM does **not** choose the score—it's computed deterministically.
+
+- **MarketTimingScore** (LLM determines): How favorable the current M&A environment is for this type of business.
+
+- **BuyerAppetiteScore** (LLM determines): How active and interested buyers are (local, strategic, PE, roll-ups, etc.).
+
+- **OwnerDependenceScore** (LLM determines): How much the business relies on the owner's skill, relationships, and branding.
+
+### Score Tiers
+
+- **0–49 → Low Readiness**: Business needs improvement before going to market (high owner dependence, limited scalability, weaker buyer interest).
+
+- **50–69 → Moderate Readiness**: Business is sellable at fair market value; some improvements could meaningfully raise valuation.
+
+- **70–100 → High Readiness**: Business is attractive to buyers, has strong fundamentals, and can command higher multiples.
 
 ---
 
 ## Architecture Overview
 
-1. **Call 1 – Website Extraction (LLM)**  
-   Extracts business metadata from the website and public context.
+### Call 1 – Website Extraction (LLM)
 
-2. **Call 2 – Research (LLM)**  
-   Supplies SG&A bands, industry multiples, profitability descriptors, and preliminary factor scores (growth, timing, buyer appetite, owner dependence).
+Fast, lightweight, purely structural business profiling. Extracts:
+- Business name, industry, business model
+- Products/services, customer segments
+- Market keywords, recurring revenue signals
+- Owner dependence indicators
 
-3. **Deterministic Engines (Node/Express)**  
-   - `profitabilityEngine.ts`: derives gross margin, estimated EBITDA margin, and profitability score.  
-   - `scoringEngine.ts`: combines the five factors into the final Sell Readiness Score.  
-   - `valuation.ts`: applies LLM-provided multiples plus the computed EBITDA margin to produce revenue- and EBITDA-based valuation ranges.
+**Input**: Website URL  
+**Output**: Structured JSON with business metadata
 
-4. **Call 3 – Narrative Generation (LLM)**  
-   Uses all structured outputs to write the executive summary, strengths/risks, key factor blurbs, and recommended actions.
+This supports the UI Step 2 and informs Call 2 research.
 
-5. **Frontend (Vite + React + shadcn-ui)**  
-   Displays the full report, handles the two-step user flow, and offers a “Download Report” PDF export.
+### Call 2 – Research LLM
+
+This call performs research, NOT calculations. It produces:
+- SG&A industry bands (low, mid, high percentages)
+- Industry EBITDA & revenue multiples
+- Profitability context and descriptors
+- Growth score (0–100)
+- Market timing score (0–100)
+- Buyer appetite score (0–100)
+- Owner dependence score (0–100)
+
+**Input**: Revenue, gross profit, website extraction output  
+**Output**: Structured JSON with industry intelligence and factor scores
+
+### Deterministic Profitability Engine
+
+This is backend logic (not LLM). Calculates profitability metrics from user inputs and LLM-researched SG&A bands.
+
+**Inputs**:
+- Revenue
+- Gross Profit
+- SG&A band (from Call 2)
+
+**Calculations**:
+
+```
+Gross Margin = GrossProfit / Revenue
+
+Estimated EBITDA Margin = Gross Margin − (SG&A Midpoint / 100)
+
+EBITDA Margin is clamped between:
+  -20% (min)
+  +60% (max)
+```
+
+**Profitability Score Bands**:
+- > 30% → 90
+- > 20% → 80
+- > 10% → 60
+- > 0% → 40
+- ≤ 0% → 20
+
+**Example**:
+- Revenue = 300,000
+- Gross Profit = 123,000
+- Gross Margin = 41%
+- SG&A midpoint = 22%
+- Estimated EBITDA Margin = 41% − 22% = **19%**
+- Profitability Score = **60** (falls between 10% and 20%)
+
+### Deterministic Scoring Engine
+
+Combines LLM scores + computed profitability into final score:
+
+```
+FinalScore = 0.3*GrowthScore + 0.2*ProfitabilityScore + 0.2*MarketTimingScore + 0.2*BuyerAppetiteScore + 0.1*OwnerDependenceScore
+```
+
+**Example**:
+```
+FinalScore = 0.3*45 + 0.2*60 + 0.2*50 + 0.2*55 + 0.1*25
+           = 49
+```
+
+### Deterministic Valuation Engine
+
+Uses industry multiples (from Call 2) and estimated EBITDA margin (from profitability engine).
+
+**Revenue-Based Valuation**:
+```
+Low Range = Revenue × Revenue Multiple Low
+High Range = Revenue × Revenue Multiple High
+```
+
+**EBITDA-Based Valuation**:
+```
+EBITDA = Revenue × Estimated EBITDA Margin
+Low Range = EBITDA × EBITDA Multiple Low
+High Range = EBITDA × EBITDA Multiple High
+```
+
+**Example** (using 0.3x–0.7x revenue multiples, 2x–4x EBITDA multiples):
+- Revenue = 300,000
+- Revenue-based: $90,000–$210,000
+- EBITDA = 300,000 × 19% = 57,000
+- EBITDA-based: $114,000–$228,000
+
+### Call 3 – Narrative Generation (LLM)
+
+Uses all structured outputs to generate banker-style narrative:
+- Executive summary
+- Strengths and risks
+- Key factor explanations
+- Recommended actions
+
+**Input**: Website extraction, research output, scores, valuation  
+**Output**: Structured narrative JSON
+
+### Frontend (Vite + React + shadcn-ui)
+
+Displays the full report, handles the two-step user flow, and offers a "Download Report" PDF export.
 
 ---
 
